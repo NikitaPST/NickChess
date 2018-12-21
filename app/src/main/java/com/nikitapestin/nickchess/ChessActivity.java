@@ -194,6 +194,8 @@ public class ChessActivity extends AppCompatActivity {
         if (checkConditions())
             return;
 
+        machineTurn();
+
         inputEnabled = true;
     }
 
@@ -224,5 +226,11 @@ public class ChessActivity extends AppCompatActivity {
                 });
         dlgAlert.setCancelable(false);
         dlgAlert.create().show();
+    }
+
+    private void machineTurn() {
+        game.generatePosition();
+
+        checkConditions();
     }
 }
