@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.GridView;
@@ -36,14 +38,23 @@ public class ChessActivity extends AppCompatActivity {
     private boolean inputEnabled = true;
     private String selectedFigure = "";
 
+    private FrameLayout progressBarHolder;
+    private TableLayout chessBoard;
+
+    private AlphaAnimation inAnimation;
+    private AlphaAnimation outAnimation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        initialize();
 
         game = new GameSearch(ChessActivity.this);
+        progressBarHolder = (FrameLayout)findViewById(R.id.progressBarHolder);
+        chessBoard = (TableLayout)findViewById(R.id.chessBoard);
+
+        initialize();
     }
 
     @Override
@@ -69,7 +80,6 @@ public class ChessActivity extends AppCompatActivity {
     }
 
     private void initialize() {
-        final TableLayout chessBoard = (TableLayout)findViewById(R.id.chessBoard);
         for (int i=0; i<64; i++) {
             ImageView img = (ImageView)chessBoard.findViewWithTag(String.format("picture%d", i));
             img.setOnClickListener(new View.OnClickListener() {
@@ -110,7 +120,8 @@ public class ChessActivity extends AppCompatActivity {
                             return;
                         }
 
-                        humanTurn(selectedFigure, square);
+                        //humanTurn(selectedFigure, square);
+                        new HumanTurnTask().execute(selectedFigure, square);
 
                         selectedFigure = "";
                         clearHighlights();
@@ -120,21 +131,25 @@ public class ChessActivity extends AppCompatActivity {
         }
     }
 
-    public void drawPosition(Position pos) {
-        int square_index = 0;
-        for (int col=92; col>=22; col-= 10) {
-            for (int ii=0; ii<8; ii++) {
-                int i = ii + col;
-                if (pos.get(i)!= Position.OFF_BOARD) {
-                    renderSquare(pos.get(i), square_index);
-                    square_index++;
+    public void drawPosition(final Position pos) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int square_index = 0;
+                for (int col=92; col>=22; col-= 10) {
+                    for (int ii=0; ii<8; ii++) {
+                        int i = ii + col;
+                        if (pos.get(i)!= Position.OFF_BOARD) {
+                            renderSquare(pos.get(i), square_index);
+                            square_index++;
+                        }
+                    }
                 }
             }
-        }
+        });
     }
 
     private void renderSquare(int piece, int square_index) {
-        TableLayout chessBoard = (TableLayout)findViewById(R.id.chessBoard);
         ImageView img = (ImageView)chessBoard.findViewWithTag(String.format("picture%d", square_index));
         if (piece == Position.BLANK) {
             img.setImageResource(android.R.color.transparent);
@@ -232,5 +247,31 @@ public class ChessActivity extends AppCompatActivity {
         game.generatePosition();
 
         checkConditions();
+    }
+
+    private class HumanTurnTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+            inAnimation = new AlphaAnimation(0f, 1f);
+            inAnimation.setDuration(200);
+            progressBarHolder.setAnimation(inAnimation);
+            progressBarHolder.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            outAnimation = new AlphaAnimation(1f, 0f);
+            outAnimation.setDuration(200);
+            progressBarHolder.setAnimation(outAnimation);
+            progressBarHolder.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            humanTurn(params[0], params[1]);
+            return null;
+        }
     }
 }
