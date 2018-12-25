@@ -36,6 +36,7 @@ class Position {
             };
 
     private int[] board = new int[BOARD_SIZE];
+    private String commentary = "";
 
     void initialize() {
         for (int i=0; i<BOARD_SIZE; i++) {
@@ -48,6 +49,14 @@ class Position {
     }
 
     int get(String square) { return board[GameSearch.squareToIndex(square)]; }
+
+    String getCommentary() {
+        return commentary;
+    }
+
+    void setCommentary(String commentary) {
+        this.commentary = commentary;
+    }
 
     boolean isOnSide(int square_index, int side) {
         return (((board[square_index] < 0) && (side < 0)) || ((board[square_index] > 0) && (side > 0)));

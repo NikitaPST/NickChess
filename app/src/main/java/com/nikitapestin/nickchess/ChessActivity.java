@@ -16,11 +16,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ public class ChessActivity extends AppCompatActivity {
     private GameSearch game;
     private boolean inputEnabled = true;
     private String selectedFigure = "";
+    private ArrayAdapter<String> logAdapter;
 
     private FrameLayout progressBarHolder;
     private TableLayout chessBoard;
@@ -53,6 +56,10 @@ public class ChessActivity extends AppCompatActivity {
         game = new GameSearch(ChessActivity.this);
         progressBarHolder = (FrameLayout)findViewById(R.id.progressBarHolder);
         chessBoard = (TableLayout)findViewById(R.id.chessBoard);
+
+        ListView logList = (ListView)findViewById(R.id.logList);
+        logAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        logList.setAdapter(logAdapter);
 
         initialize();
     }
@@ -105,7 +112,7 @@ public class ChessActivity extends AppCompatActivity {
                         for (Integer move : possibleMoves) {
                             ViewGroup panel = (ViewGroup)chessBoard.findViewWithTag(GameSearch.indexToSquare(move));
                             ImageView img = (ImageView)panel.getChildAt(0);
-                            img.setBackgroundColor(0XFF30FFE3);
+                            img.setBackgroundColor(0X8830FFE3);
                         }
                     } else if (selectedFigure.equals(square)) {
                         selectedFigure = "";
@@ -145,6 +152,15 @@ public class ChessActivity extends AppCompatActivity {
                         }
                     }
                 }
+            }
+        });
+    }
+
+    public void writeToLog(final String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logAdapter.insert(msg, 0);
             }
         });
     }
@@ -206,6 +222,8 @@ public class ChessActivity extends AppCompatActivity {
         Move newMove = new Move(figure_index, dest_index);
         game.makeMove(newMove);
 
+        writeToLog("White: " + figure + destination);
+
         if (checkConditions())
             return;
 
@@ -228,19 +246,24 @@ public class ChessActivity extends AppCompatActivity {
         return false;
     }
 
-    private void messageBox(CharSequence msg) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
-        dlgAlert.setMessage(msg);
-        dlgAlert.setTitle("Chess");
-        dlgAlert.setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finishAndRemoveTask();
-                    }
-                });
-        dlgAlert.setCancelable(false);
-        dlgAlert.create().show();
+    private void messageBox(final CharSequence msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ChessActivity.this);
+                dlgAlert.setMessage(msg);
+                dlgAlert.setTitle("Chess");
+                dlgAlert.setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finishAndRemoveTask();
+                            }
+                        });
+                dlgAlert.setCancelable(false);
+                dlgAlert.create().show();
+            }
+        });
     }
 
     private void machineTurn() {

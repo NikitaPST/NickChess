@@ -765,10 +765,10 @@
             </TableLayout>
         </com.nikitapestin.nickchess.SquareLayout>
         <ListView android:id="@+id/logList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/chessBoardHolder"
-            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/chessBoardHolder"
+            android:layout_alignParentRight="true"
             android:drawSelectorOnTop="false"></ListView>
     </RelativeLayout>
 

@@ -11,7 +11,7 @@ import java.util.Vector;
 class GameSearch {
     static final boolean PROGRAM = false;
     static final boolean HUMAN = true;
-    private static final int MAX_DEPTH = 4;
+    private static final int MAX_DEPTH = 4; // Main constant. Controls difficulty vs performance
 
     private static int[] index = { 0, 12, 15, 10, 1, 6, 0, 0, 0, 6 };
     private static int[] pieceMovementTable =
@@ -178,7 +178,8 @@ class GameSearch {
     void generatePosition() {
         Vector v = alphaBeta(0, currentPosition, PROGRAM);
         currentPosition = (Position)v.get(1);
-        drawnPosition();
+        activity.writeToLog("Black: " + currentPosition.getCommentary());
+        drawPosition();
     }
 
     private Vector alphaBeta(int depth, Position p, boolean player) {
@@ -385,6 +386,7 @@ class GameSearch {
 
             chessPos[i].set(possibleMoveList.get(i).getTo(), chessPos[i].get(possibleMoveList.get(i).getFrom()));
             chessPos[i].set(possibleMoveList.get(i).getFrom(), Position.BLANK);
+            chessPos[i].setCommentary(indexToSquare(possibleMoveList.get(i).getFrom()) + indexToSquare(possibleMoveList.get(i).getTo()));
         }
 
         return chessPos;
