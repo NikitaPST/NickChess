@@ -11,7 +11,7 @@ import java.util.Vector;
 class GameSearch {
     static final boolean PROGRAM = false;
     static final boolean HUMAN = true;
-    private static final int MAX_DEPTH = 4; // Main constant. Controls difficulty vs performance
+    private static final int MAX_DEPTH = 5; // Main constant. Controls difficulty vs performance
 
     private static int[] index = { 0, 12, 15, 10, 1, 6, 0, 0, 0, 6 };
     private static int[] pieceMovementTable =
